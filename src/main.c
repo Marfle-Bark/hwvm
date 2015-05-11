@@ -33,9 +33,7 @@ void eval(int instr) {
   switch(instr) {
 
     case PSH: {
-      ip++;
-      sp++;
-      stack[sp] = test[ip];
+      stack[++sp] = test[++ip];
       printf("**Pushed %i\n", stack[sp]);
       break;
     }
@@ -45,6 +43,8 @@ void eval(int instr) {
     }
 
     case POP: {
+      int val = stack[sp--];
+      printf("**Popped %i\n", val);
       break;
     }
 
@@ -57,6 +57,7 @@ void eval(int instr) {
       printf("***Halting.");
       break;
     }
+
   }
 }
 
