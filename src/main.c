@@ -10,6 +10,11 @@ typedef enum {
   HLT   //HLT: Program over.
 } InstructionSet;
 
+typedef enum {
+  A, B, C, D, E, F,
+  NUM_OF_REGISTERS
+} Registers;
+
 const int test[] = {
   PSH, 5,
   PSH, 6,
