@@ -39,6 +39,10 @@ void eval(int instr) {
     }
 
     case ADD: {
+      int a = stack[sp--];
+      int b = stack[sp--];
+      stack[++sp] = a + b;
+      printf("**Added %i and %i to get %i.\n", a, b, stack[sp]);
       break;
     }
 
