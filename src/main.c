@@ -18,22 +18,33 @@ const int test[] = {
   HLT
 };
 
+//"is the VM running?"
+bool running = true;
+
 //instruction pointer
 int ip = 0;
+
 //get instruction at instruction pointer
 int fetch() { return test[ip]; }
+
 //increment instruction pointer
 void step() { ++ip; }
 
-bool running = true;
+//evaluate instruction
+void eval(int instr) {
+  printf("%i\n", instr);
+  switch(instr) {
+    case HLT:
+      running = false;
+      break;
+  }
+}
 
 int main() {
   printf("Launching HWVM...\n");
   
   while (running) {
-    int x = fetch();
-    printf("%i\n", x);
-    if (x == HLT) running = false;
+    eval(fetch());
     step();
   }
 
