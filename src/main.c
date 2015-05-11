@@ -31,22 +31,32 @@ int fetch() { return test[ip]; }
 void eval(int instr) {
   printf("*Evaluating %i\n", instr);
   switch(instr) {
-    case PSH:
+
+    case PSH: {
       ip++;
       sp++;
       stack[sp] = test[ip];
       printf("**Pushed %i\n", stack[sp]);
       break;
-    case ADD:
+    }
+
+    case ADD: {
       break;
-    case POP:
+    }
+
+    case POP: {
       break;
-    case SET:
+    }
+
+    case SET: {
       break;
-    case HLT:
+    }
+
+    case HLT: {
       running = false;
       printf("***Halting.");
       break;
+    }
   }
 }
 
