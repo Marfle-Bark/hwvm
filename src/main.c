@@ -18,30 +18,24 @@ const int test[] = {
   HLT
 };
 
-//"is the VM running?"
-bool running = true;
+bool running = true;  //"is the VM running?"
 
-//instruction pointer
-int ip = 0;
+int ip = 0;     //instruction pointer
+int sp = -1;    //stack pointer
+int stack[256]; //256-int stack
 
 //get instruction at instruction pointer
 int fetch() { return test[ip]; }
 
-//increment instruction pointer
-void step() { ++ip; }
-
-//decrement instruction pointer
-void back() { --ip; }
-
-//jump ip to position in code
-void jump(int position) { ip = position; }
-
 //evaluate instruction
 void eval(int instr) {
-  printf("Evaluating %i\n", instr);
+  printf("*Evaluating %i\n", instr);
   switch(instr) {
     case PSH:
-      step();
+      ip++;
+      sp++;
+      stack[sp] = test[ip];
+      printf("**Pushed %i\n", stack[sp]);
       break;
     case ADD:
       break;
@@ -51,16 +45,17 @@ void eval(int instr) {
       break;
     case HLT:
       running = false;
+      printf("***Halting.");
       break;
   }
 }
 
 int main() {
-  printf("Launching HWVM...\n");
+  printf("***Launching HWVM...\n");
   
   while (running) {
     eval(fetch());
-    step();
+    ip++;
   }
 
   return 0;
