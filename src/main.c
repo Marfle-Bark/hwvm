@@ -24,12 +24,38 @@ int ip = 0;     //instruction pointer
 int sp = -1;    //stack pointer
 int stack[256]; //256-int stack
 
+void printInstruction(int instr) {
+  printf("*Evaluating instruction ");
+  switch(instr) {
+    case 0:
+      printf("PSH\n");
+      break;
+    case 1:
+      printf("ADD\n");
+      break;
+    case 2:
+      printf("POP\n");
+      break;
+    case 3:
+      printf("SET\n");
+      break;
+    case 4:
+      printf("HLT\n");
+      break;
+    default:
+      printf("ERROR\n");
+      break;
+    }
+}
+
 //get instruction at instruction pointer
 int fetch() { return test[ip]; }
 
 //evaluate instruction
 void eval(int instr) {
-  printf("*Evaluating %i\n", instr);
+  
+  printInstruction(instr);
+
   switch(instr) {
 
     case PSH: {
@@ -58,7 +84,7 @@ void eval(int instr) {
 
     case HLT: {
       running = false;
-      printf("***Halting.");
+      printf("**Halting.\n");
       break;
     }
 
@@ -66,12 +92,14 @@ void eval(int instr) {
 }
 
 int main() {
-  printf("***Launching HWVM...\n");
+  printf("\n\n***Launching HWVM...\n\n\n");
   
   while (running) {
     eval(fetch());
     ip++;
   }
+
+  printf("\n\n***Closing HWVM...\n\n\n");
 
   return 0;
 }
