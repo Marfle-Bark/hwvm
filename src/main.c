@@ -30,10 +30,25 @@ int fetch() { return test[ip]; }
 //increment instruction pointer
 void step() { ++ip; }
 
+//decrement instruction pointer
+void back() { --ip; }
+
+//jump ip to position in code
+void jump(int position) { ip = position; }
+
 //evaluate instruction
 void eval(int instr) {
-  printf("%i\n", instr);
+  printf("Evaluating %i\n", instr);
   switch(instr) {
+    case PSH:
+      step();
+      break;
+    case ADD:
+      break;
+    case POP:
+      break;
+    case SET:
+      break;
     case HLT:
       running = false;
       break;
