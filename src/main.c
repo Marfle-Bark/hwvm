@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 //program instructions
 typedef enum {
@@ -24,15 +25,17 @@ int fetch() { return test[ip]; }
 //increment instruction pointer
 void step() { ++ip; }
 
+bool running = true;
+
 int main() {
   printf("Launching HWVM...\n");
   
-  int instr = fetch();
-  printf("%i\n", instr);
-
-  step();
-  instr = fetch();
-  printf("%i\n", instr);
+  while (running) {
+    int x = fetch();
+    printf("%i\n", x);
+    if (x == HLT) running = false;
+    step();
+  }
 
   return 0;
 }
