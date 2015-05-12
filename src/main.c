@@ -7,12 +7,12 @@
 
 //program instructions
 typedef enum {
-  PSH,  //PSH X: Push X onto the stack.
+  PUSH,  //PUSH X: Push X onto the stack.
   ADD,  //ADD: Pop two numbers off of the stack, add them, put result in RP.
   POP,  //POP: Pop top number off the stack into RP.
   PEEK, //PEEK: Peek top number off the stack into RP.
   SET,  //SET X Y: Set register X to non-register value Y.
-  HLT   //HLT: Program over.
+  HALT   //HALT: Program over.
 } InstructionSet;
 
 typedef enum {
@@ -26,14 +26,17 @@ typedef enum {
 int registers[NUM_OF_REGISTERS];
 
 const int program[] = {
-  PSH, 5,
-  PSH, 6,
-  ADD,
-  PEEK,
   SET, A, 5,
+  PUSH, 5,
+  PUSH, 6,
   SET, RP, B,
+  ADD,
+  PUSH, 1,
+  PUSH, 2,
+  SET, RP, C,
+  PEEK,
   POP,
-  HLT
+  HALT
 };
 
 bool running = true;  //"is the VM running?"
@@ -42,8 +45,8 @@ int stack[256]; //256-int stack
 
 char* getInstruction(int instr) {
   switch(instr) {
-    case PSH:
-      return "PSH";
+    case PUSH:
+      return "PUSH";
     case ADD:
       return "ADD";
     case POP:
@@ -52,8 +55,8 @@ char* getInstruction(int instr) {
       return "PEEK";
     case SET:
       return "SET";
-    case HLT:
-      return "HLT";
+    case HALT:
+      return "HALT";
     default:
       return "ERROR";
     }
@@ -99,37 +102,36 @@ void dumpStack() {
   printf("\n");
 }
 
-//get instruction at instruction pointer
-int fetch() { return program[ip]; }
-
 //evaluate instruction
-void eval(int instr) {
-  
+void eval() {
+  int instr = program[ip];
   printf("*Evaluating instruction %s...\n", getInstruction(instr));
 
   switch(instr) {
 
-    case PSH: {
+    case PUSH: {
       stack[++sp] = program[++ip];
-      printf("**Pushed %i\n", stack[sp]);
+      printf("**Pushed %i onto the stack.\n", stack[sp]);
       break;
     }
 
     case ADD: {
       int a = stack[sp--];
       int b = stack[sp--];
-      stack[++sp] = a + b;
-      printf("**Added %i and %i to get %c.\n", a, b, stack[sp]);
+      registers[rp] = a + b;
+      printf("**Added %i and %i to get %i.\n", a, b, registers[rp]);
       break;
     }
 
     case POP: {
       registers[rp] = stack[sp--];
+      printf("**Popped %i onto register %s.\n", registers[rp], getReg(rp));
       break;
     }
 
     case PEEK: {
-      printf("**Peeked %i\n", stack[sp-1]);
+      registers[rp] = stack[sp];
+      printf("**Peeked %i onto register %s.\n", registers[rp], getReg(rp));
       break;
     }
 
@@ -141,13 +143,14 @@ void eval(int instr) {
       break;
     }
 
-    case HLT: {
+    case HALT: {
       running = false;
       printf("**Halting.\n");
       break;
     }
 
   }
+  ip++; //increment IP at end of eval()
 }
 
 void init() {
@@ -170,8 +173,7 @@ int main() {
   int cycles = 0;
 
   while (running) {
-    eval(fetch());
-    ip++;
+    eval();
     cycles++;
   }
 
