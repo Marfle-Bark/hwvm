@@ -1,6 +1,6 @@
 COMPILER = gcc
 SOURCES = main.c
-FLAGS = -Wall -Wextra -g -std=c11
+FLAGS = -Wall -Wextra -g -std=c1x
 OUTPUT = hwvm.out
 
 all: build clean

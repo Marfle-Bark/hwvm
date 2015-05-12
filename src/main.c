@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define ip (registers[IP])
+#define sp (registers[SP])
+
 //program instructions
 typedef enum {
   PSH,  //PSH X: Push X onto the stack.
@@ -11,22 +14,23 @@ typedef enum {
 } InstructionSet;
 
 typedef enum {
-  A, B, C, D, E, F,
+  A, B, C, D, E, F, IP, SP,
   NUM_OF_REGISTERS
 } Registers;
 
-const int test[] = {
+int registers[NUM_OF_REGISTERS];
+
+const int program[] = {
   PSH, 5,
   PSH, 6,
   ADD,
   POP,
+  SET, A, 5,
   HLT
 };
 
 bool running = true;  //"is the VM running?"
 
-int ip = 0;     //instruction pointer
-int sp = -1;    //stack pointer
 int stack[256]; //256-int stack
 
 void printInstruction(int instr) {
@@ -53,8 +57,40 @@ void printInstruction(int instr) {
     }
 }
 
+char* getReg(int reg) {
+  switch(reg) {
+    case 0:
+      return "A";
+      break;
+    case 1:
+      return "B";
+      break;
+    case 2:
+      return "C";
+      break;
+    case 3:
+      return "D";
+      break;
+    case 4:
+      return "E";
+      break;
+    case 5:
+      return "F";
+      break;
+    case 6:
+      return "IP";
+      break;
+    case 7:
+      return "SP";
+      break;
+    default:
+      return "ERROR";
+      break;
+  }
+}
+
 //get instruction at instruction pointer
-int fetch() { return test[ip]; }
+int fetch() { return program[ip]; }
 
 //evaluate instruction
 void eval(int instr) {
@@ -64,7 +100,7 @@ void eval(int instr) {
   switch(instr) {
 
     case PSH: {
-      stack[++sp] = test[++ip];
+      stack[++sp] = program[++ip];
       printf("**Pushed %i\n", stack[sp]);
       break;
     }
@@ -73,7 +109,7 @@ void eval(int instr) {
       int a = stack[sp--];
       int b = stack[sp--];
       stack[++sp] = a + b;
-      printf("**Added %i and %i to get %i.\n", a, b, stack[sp]);
+      printf("**Added %i and %i to get %c.\n", a, b, stack[sp]);
       break;
     }
 
@@ -84,6 +120,10 @@ void eval(int instr) {
     }
 
     case SET: {
+      int reg = program[++ip];
+      int val = program[++ip];
+      registers[reg] = val;
+      printf("**Loaded %i into register %s.\n", val, getReg(reg));
       break;
     }
 
@@ -96,15 +136,26 @@ void eval(int instr) {
   }
 }
 
+void init() {
+  printf("**Initializing pointers...\n");
+  ip = 0;
+  sp = -1;
+}
+
 int main() {
   printf("\n\n***Launching HWVM...\n\n\n");
+  init();
   
+  int cycle = 0;
+
   while (running) {
     eval(fetch());
     ip++;
+    cycle++;
   }
 
   printf("\n\n***Closing HWVM...\n\n\n");
+  printf("\n***VM ran for %i cycles.\n", cycle);
 
   return 0;
 }
