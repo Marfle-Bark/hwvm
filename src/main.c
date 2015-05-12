@@ -1,20 +1,25 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define rp (registers[RP])
 #define ip (registers[IP])
 #define sp (registers[SP])
 
 //program instructions
 typedef enum {
   PSH,  //PSH X: Push X onto the stack.
-  ADD,  //ADD: Pop top two numbers off of the stack, add them, push result.
-  POP,  //POP: Pop and print top number off the stack.
-  SET,  //SET X Y: Set register X to value Y.
+  ADD,  //ADD: Pop two numbers off of the stack, add them, put result in RP.
+  POP,  //POP: Pop top number off the stack into RP.
+  PEEK, //PEEK: Peek top number off the stack into RP.
+  SET,  //SET X Y: Set register X to non-register value Y.
   HLT   //HLT: Program over.
 } InstructionSet;
 
 typedef enum {
-  A, B, C, D, E, F, IP, SP,
+  A, B, C, D, E, F,
+  RP, //register pointer
+  IP, //instruction pointer
+  SP, //stack pointer
   NUM_OF_REGISTERS
 } Registers;
 
@@ -24,8 +29,10 @@ const int program[] = {
   PSH, 5,
   PSH, 6,
   ADD,
-  POP,
+  PEEK,
   SET, A, 5,
+  SET, RP, B,
+  POP,
   HLT
 };
 
@@ -33,60 +40,63 @@ bool running = true;  //"is the VM running?"
 
 int stack[256]; //256-int stack
 
-void printInstruction(int instr) {
-  printf("*Evaluating instruction ");
+char* getInstruction(int instr) {
   switch(instr) {
-    case 0:
-      printf("PSH\n");
-      break;
-    case 1:
-      printf("ADD\n");
-      break;
-    case 2:
-      printf("POP\n");
-      break;
-    case 3:
-      printf("SET\n");
-      break;
-    case 4:
-      printf("HLT\n");
-      break;
+    case PSH:
+      return "PSH";
+    case ADD:
+      return "ADD";
+    case POP:
+      return "POP";
+    case PEEK:
+      return "PEEK";
+    case SET:
+      return "SET";
+    case HLT:
+      return "HLT";
     default:
-      printf("ERROR\n");
-      break;
+      return "ERROR";
     }
 }
 
 char* getReg(int reg) {
   switch(reg) {
-    case 0:
+    case A:
       return "A";
-      break;
-    case 1:
+    case B:
       return "B";
-      break;
-    case 2:
+    case C:
       return "C";
-      break;
-    case 3:
+    case D:
       return "D";
-      break;
-    case 4:
+    case E:
       return "E";
-      break;
-    case 5:
+    case F:
       return "F";
-      break;
-    case 6:
+    case RP:
+      return "RP";
+    case IP:
       return "IP";
-      break;
-    case 7:
+    case SP:
       return "SP";
-      break;
     default:
       return "ERROR";
-      break;
   }
+}
+
+void dumpRegisters() {
+  printf("***Register Values:\n");
+  int i;
+  for(i = 0; i < NUM_OF_REGISTERS; i++)
+    printf("%s: %i\n", getReg(i), registers[i]);
+  printf("\n");
+}
+
+void dumpStack() {
+  printf("***Stack trace:\n");
+  while(sp > -1)
+    printf("%i: %i\n", sp--, stack[sp]);
+  printf("\n");
 }
 
 //get instruction at instruction pointer
@@ -95,7 +105,7 @@ int fetch() { return program[ip]; }
 //evaluate instruction
 void eval(int instr) {
   
-  printInstruction(instr);
+  printf("*Evaluating instruction %s...\n", getInstruction(instr));
 
   switch(instr) {
 
@@ -114,8 +124,12 @@ void eval(int instr) {
     }
 
     case POP: {
-      int val = stack[sp--];
-      printf("**Popped %i\n", val);
+      registers[rp] = stack[sp--];
+      break;
+    }
+
+    case PEEK: {
+      printf("**Peeked %i\n", stack[sp-1]);
       break;
     }
 
@@ -137,7 +151,14 @@ void eval(int instr) {
 }
 
 void init() {
-  printf("**Initializing pointers...\n");
+  printf("**Initializing registers...\n");
+  registers[A] = 0;
+  registers[B] = 0;
+  registers[C] = 0;
+  registers[D] = 0;
+  registers[E] = 0;
+  registers[F] = 0;
+  rp = A;
   ip = 0;
   sp = -1;
 }
@@ -146,16 +167,18 @@ int main() {
   printf("\n\n***Launching HWVM...\n\n\n");
   init();
   
-  int cycle = 0;
+  int cycles = 0;
 
   while (running) {
     eval(fetch());
     ip++;
-    cycle++;
+    cycles++;
   }
 
-  printf("\n\n***Closing HWVM...\n\n\n");
-  printf("\n***VM ran for %i cycles.\n", cycle);
+  printf("\n\n***Closing HWVM...\n");
+  printf("***VM ran for %i cycles.\n", cycles);
+  dumpRegisters();
+  dumpStack();
 
   return 0;
 }
